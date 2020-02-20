@@ -1,0 +1,63 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  margin: 0;
+}
+
+.grid {
+  display: flex;
+  flex-direction: row;
+  border: 1px solid grey;
+  width: 300px;
+  height: 300px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+.cell {
+  width: 10%;
+  height: 10%;
+  border: 1px solid green;
+}
+
+.square {
+  border: 1px solid rgba(0,0,0,0.5);
+  background-color: yellow;
+}
+
+.lshape {
+  border: 1px solid rgba(0,0,0,0.5);
+  background-color: palevioletred;
+}
+
+.jshape {
+  border: 1px solid rgba(0,0,0,0.5);
+  background-color: orange;
+}
+
+.tshape {
+  border: 1px solid rgba(0,0,0,0.5);
+  background-color: purple;
+}
+
+.sshape {
+  border: 1px solid rgba(0,0,0,0.5);
+  background-color: red;
+}
+
+.zshape {
+  border: 1px solid rgba(0,0,0,0.5);
+  background-color: green;
+}
+
+.ishape {
+    border: 1px solid rgba(0,0,0,0.5);
+    background-color: royalblue
+}
