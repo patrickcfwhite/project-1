@@ -9,44 +9,57 @@ function setupGame() {
   const cellsArray = []
   let activeObject
   let activeShape
-  let orientation = 0
-  let x = 25
+  let orientation
+  const point = 25
   let length
 
-  const square = ['square', { 0: [x, (x + 1), (x + width), (x + width + 1)] }]
-  const lshape = ['lshape', {
-    0: [(x - width), x, (x + width), (x + width + 1)],
-    1: [(x - 1), x, (x + 1), (x + width - 1)],
-    2: [(x - width - 1), (x - width), x, (x + width)],
-    3: [(x - width + 1), (x - 1), x, (x + 1)]
-  }]
-  const jshape = ['jshape', {
-    0: [(x - width), x, (x + width), (x + width - 1)],
-    1: [(x - 1 - width), (x - 1), x, (x + 1)],
-    2: [(x - width), (x - width + 1), x, (x + width)],
-    3: [(x - 1), x, (x + 1), (x + width + 1)]
-  }]
-  const ishape = ['ishape', {
-    0: [(x - width), x, (x + width), (x + (2 * width))],
-    1: [(x - 1), x, (x + 1), (x + 2)],
-    2: [(x + 1 - width), (x + 1), (x + 1 + width), (x + 1 + (2 * width))],
-    3: [(x - 1 + width), (x + width), (x + width + 1), (x + width + 2)]
-  }]
-  const tshape = ['tshape', {
-    0: [(x - width), (x - 1), x, (x + 1)],
-    1: [(x - width), x, (x + 1), (x + width)],
-    2: [(x - 1), x, (x + 1), (x + width)],
-    3: [(x - width), (x - 1), x, (x + width)]
-  }]
-  const sshape = ['sshape',{
-    0: [x, (x + 1), (x + width - 1), (x + width)],
-    1: [(x - width), x, (x + 1), (x + width + 1)]
-  }]
-  const zshape = ['zshape', {
-    0: [(x - width - 1), (x - width), x, (x + 1)],
-    1: [(x - width), (x - 1), x, (x + width - 1)]
-  }]
-
+  function square(x) {
+    return ['square', { 0: [x, (x + 1), (x + width), (x + width + 1)] }]
+  }
+  function lshape(x) {
+    return ['lshape', {
+      0: [(x - width), x, (x + width), (x + width + 1)],
+      1: [(x - 1), x, (x + 1), (x + width - 1)],
+      2: [(x - width - 1), (x - width), x, (x + width)],
+      3: [(x - width + 1), (x - 1), x, (x + 1)]
+    }]
+  }
+  function jshape(x) {
+    return ['jshape', {
+      0: [(x - width), x, (x + width), (x + width - 1)],
+      1: [(x - 1 - width), (x - 1), x, (x + 1)],
+      2: [(x - width), (x - width + 1), x, (x + width)],
+      3: [(x - 1), x, (x + 1), (x + width + 1)]
+    }]
+  }
+  function ishape(x) {
+    return ['ishape', {
+      0: [(x - width), x, (x + width), (x + (2 * width))],
+      1: [(x - 1), x, (x + 1), (x + 2)],
+      2: [(x + 1 - width), (x + 1), (x + 1 + width), (x + 1 + (2 * width))],
+      3: [(x - 1 + width), (x + width), (x + width + 1), (x + width + 2)]
+    }]
+  }
+  function tshape(x) {
+    return ['tshape', {
+      0: [(x - width), (x - 1), x, (x + 1)],
+      1: [(x - width), x, (x + 1), (x + width)],
+      2: [(x - 1), x, (x + 1), (x + width)],
+      3: [(x - width), (x - 1), x, (x + width)]
+    }]
+  }
+  function sshape(x) {
+    return ['sshape', {
+      0: [x, (x + 1), (x + width - 1), (x + width)],
+      1: [(x - width), x, (x + 1), (x + width + 1)]
+    }]
+  }
+  function zshape(x) {
+    return ['zshape', {
+      0: [(x - width - 1), (x - width), x, (x + 1)],
+      1: [(x - width), (x - 1), x, (x + width - 1)]
+    }]
+  }
 
   for (let i = 0; i < gridCellCount; i++) {
     const cell = document.createElement('div')
@@ -55,25 +68,41 @@ function setupGame() {
     cellsArray.push(cell)
   }
 
-
   for (const button of buttons) {
-    button.addEventListener('click', () => {
-      console.log(button.id)
-      shapeBuilder(eval(button.id))
-    })
-  }
-
-  function shapeBuilder(input) {
-    activeShape = input[0]
-    activeObject = input[1]
-    length = Object.keys(activeObject).length
-    for (const position of input[1][0]) {
-      cellsArray[position].classList.add(`${activeShape}`)
-      cellsArray[position].classList.add('active')
+    if (button.classList.contains('factory')) {
+      button.addEventListener('click', () => {
+        const fn = eval(button.id)
+        shapeBuilder(fn(point))
+      })
+    } else if (button.classList.contains('function')) {
+      button.addEventListener('click', () => {
+        const fn = eval(button.id)
+        fn()
+      })
     }
   }
 
+  function shapeBuilder(input) {
+    orientation = 0
+    activeShape = input[0]
+    activeObject = input[1]
+    console.log(input[1][0])
+    length = Object.keys(activeObject).length
+    for (const position of input[1][0]) {
+
+      cellsArray[position].classList.add(`${activeShape}`)
+      cellsArray[position].classList.add('active')
+    }
+    return
+  }
+
   function shapeMover(direction) {
+    const nextPosition = activeObject[orientation].map(x => x + direction)
+    for (const position of nextPosition) {
+      if (cellsArray[position].classList.contains('fixed')) {
+        return
+      }
+    }
     for (const position of activeObject[orientation]) {
       cellsArray[position].classList.remove('active')
       cellsArray[position].classList.remove(`${activeShape}`)
@@ -89,51 +118,93 @@ function setupGame() {
     }
   }
 
-
   function shapeRotator(direction) {
+    const newOrientation = ((orientation + length + direction) % length)
+    for (const position of activeObject[newOrientation]) {
+      if (cellsArray[position].classList.contains('fixed')) {
+        return
+      }
+    }
     for (const position of activeObject[orientation]) {
       cellsArray[position].classList.remove('active')
       cellsArray[position].classList.remove(`${activeShape}`)
     }
-    orientation = ((orientation + length + direction) % length)
+    orientation = newOrientation
     for (const position of activeObject[orientation]) {
       cellsArray[position].classList.add('active')
       cellsArray[position].classList.add(`${activeShape}`)
     }
   }
 
-  function oneAwayChecker() {
-    let away = []
-    let rotation = activeObject[(orientation + 1)]
-    for (let i = 1; i < rotation.length; i++) {
-      away.push(rotation[i] - rotation[i-1])
+  function oneAwayChecker(direction) {
+    let check = true
+    let ones = 0
+    const away = []
+    const rotation = activeObject[((orientation + length + direction) % length)]
+    if (rotation.some(x => x >= gridCellCount)) {
+      return
     }
-    const fives = rotation.map(x => Math.ceil(x / width) * width)
+    for (let i = 1; i < rotation.length; i++) {
+      away.push(rotation[i] - rotation[i - 1])
+    }
+    const roundToWidth = rotation.map(x => Math.floor(x / width) * width)
+    away.forEach(x => x === 1 ? ones++ : ones[x])
 
-    console.log(activeObject[orientation])
-    console.log(away)
-    console.log(rotation)
-    console.log(fives)
+    // console.log(activeObject[orientation])
+    // console.log(rotation)
+    // console.log(away)
+    // console.log(roundToWidth)
+    //console.log(ones)
+
+
+    for (let i = 0; i < roundToWidth.length; i++) {
+      const current = roundToWidth[i]
+
+      if (away[i] === 1 && away[i]) {
+        console.log(away[i])
+        check = current === roundToWidth[i + 1] ? true : false
+        if (!check) {
+          return
+        }
+      }
+
+    }
+    return check
+  }
+
+  function toFixed() {
+    for (const position of activeObject[orientation]) {
+      console.log(cellsArray[position])
+      console.log(activeObject[orientation])
+      cellsArray[position].classList.remove('active')
+      cellsArray[position].classList.add('fixed')
+    }
+    return
+  }
+
+  function boundaryChecker(direction = 0) {
+    return (activeObject[orientation].some(x => (x + direction) % width === 0))
   }
 
   document.addEventListener('keydown', (event) => {
     if (event.key === 'ArrowRight') {
-      if (activeObject[orientation].some(x => (x + 1) % width === 0)) {
+      if (boundaryChecker(1)) {
         return
       }
       shapeMover(1)
     } else if (event.key === 'ArrowLeft') {
-      if (activeObject[orientation].some(x => x % width === 0)) {
+      if (boundaryChecker()) {
         return
       }
       shapeMover(-1)
     } else if (event.key === 'ArrowUp') {
-      // if (activeObject[orientation].some(x => x % width === 0)) {
-      //   return
-      // }
+      if (!oneAwayChecker(1)) {
+
+        return
+      }
       shapeRotator(1)
     } else if (event.key === 'ArrowDown') {
-      if (activeObject[orientation].some(x => (x + 1) % width === 0)) {
+      if (activeObject[orientation].some(x => (x + width) >= gridCellCount)) {
         return
       }
       shapeMover(width)
@@ -141,12 +212,9 @@ function setupGame() {
   })
 
 
-
-
-  
-  
-
-
+  function fullRowChecker() {
+    
+  }
 
 
 
@@ -158,11 +226,16 @@ function setupGame() {
 
 
 
-  
-  // shapeBuilder(lshape)
+
+
+
+
+
+
+
+
   // shapeMover(width)
 
-  // oneAwayChecker()
 }
 
 window.addEventListener('DOMContentLoaded', setupGame)

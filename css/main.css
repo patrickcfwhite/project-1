@@ -2,13 +2,17 @@
   box-sizing: border-box;
 }
 
-body {
+html {
   height: 100vh;
+}
+
+body {
   display: flex;
   justify-content: center;
   align-items: center;
   flex-direction: column;
   margin: 0;
+  
 }
 
 .grid {
@@ -59,5 +63,10 @@ body {
 
 .ishape {
     border: 1px solid rgba(0,0,0,0.5);
-    background-color: royalblue
+    background-color: rgb(136, 10, 73)
+}
+
+.fixed {
+  color: black;
+  opacity: 0.8;
 }
