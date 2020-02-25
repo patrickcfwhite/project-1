@@ -123,7 +123,7 @@ function setupGame() {
     ghost()
     time = setInterval(() => {
       shapeMover(width)
-    }, (20000 - ((currentLevel + 1) * 20)))
+    }, (1000 - ((currentLevel + 1) * 20)))
     return
   }
 
