@@ -1,5 +1,12 @@
+/* font-family: 'VT323', ;
+font-family: 'Share Tech Mono', ;
+font-family: 'Anonymous Pro', ;
+font-family: 'Cutive Mono', ; */
+
+
 * {
   box-sizing: border-box;
+  font-family: 'Share Tech Mono';
 }
 
 html {
@@ -12,7 +19,21 @@ body {
   align-items: center;
   flex-direction: column;
   margin: 0;
-  
+}
+
+main {
+  display: flex;
+  flex-direction: row;
+}
+
+aside {
+  display: flex;
+  flex-direction: column;
+  align-content: center;
+}
+
+.shapewrapper {
+  justify-content: flex-start;
 }
 
 .grid {
@@ -22,7 +43,7 @@ body {
   width: 300px;
   height: 300px;
   flex-wrap: wrap;
-  margin-bottom: 20px;
+  margin: 20px;
 }
 
 .cell {
@@ -31,7 +52,7 @@ body {
   border: 1px solid green;
 }
 
-.square {
+.squareshape {
   border: 1px solid rgba(0,0,0,0.5);
   background-color: yellow;
 }
@@ -69,4 +90,14 @@ body {
 .fixed {
   color: black;
   opacity: 0.8;
+}
+
+
+.squaredisplay {
+  height: 100px;
+  width: 100px;
+  justify-content: center;
+  align-content: center;
+  border: 2px solid black;
+  border-radius: 3px;
 }
