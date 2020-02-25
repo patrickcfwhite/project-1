@@ -15,6 +15,8 @@ function setupGame() {
   const cellsArray = []
   const shapeArray = []
   const holdArray = []
+  let ghostArray = []
+  let hardDropCount = 0
   let activeObject
   let activeShape
   let orientation
@@ -90,19 +92,22 @@ function setupGame() {
     cellsArray.push(cell)
   }
 
-  for (const button of buttons) {
-    if (button.classList.contains('factory')) {
-      button.addEventListener('click', () => {
-        const fn = eval(button.id)
-        shapeBuilder(fn(point))
-      })
-    } else if (button.classList.contains('function')) {
-      button.addEventListener('click', () => {
-        const fn = eval(button.id)
-        fn()
-      })
-    }
-  }
+
+  // buttons for testing
+
+  // for (const button of buttons) {
+  //   if (button.classList.contains('factory')) {
+  //     button.addEventListener('click', () => {
+  //       const fn = eval(button.id)
+  //       shapeBuilder(fn(point))
+  //     })
+  //   } else if (button.classList.contains('function')) {
+  //     button.addEventListener('click', () => {
+  //       const fn = eval(button.id)
+  //       fn()
+  //     })
+  //   }
+  // }
 
   function shapeBuilder(input) {
     orientation = 0
@@ -115,21 +120,22 @@ function setupGame() {
       cellsArray[position].classList.add(`${activeShape}`)
       cellsArray[position].classList.add('active')
     }
+    ghost()
     time = setInterval(() => {
       shapeMover(width)
-    }, (800 - ((currentLevel + 1) * 20)))
+    }, (20000 - ((currentLevel + 1) * 20)))
     return
   }
 
   function shapeMover(direction) {
     const nextPosition = activeObject[orientation].map(x => x + direction)
     for (const position of nextPosition) {
-      console.log(position)
+      //console.log(position)
       if (position >= gridCellCount || cellsArray[position].classList.contains('fixed')) {
-        console.log(position)
         direction === width ? toFixed() : direction
         return
       }
+
     }
     for (const position of activeObject[orientation]) {
       cellsArray[position].classList.remove('active')
@@ -141,9 +147,13 @@ function setupGame() {
       }
     }
     for (const position of activeObject[orientation]) {
+      if (cellsArray[position].classList.contains('ghost')) {
+        cellsArray[position].classList.remove('ghost')
+      }
       cellsArray[position].classList.add('active')
       cellsArray[position].classList.add(`${activeShape}`)
     }
+    ghost()
   }
 
   function shapeRotator(direction) {
@@ -159,9 +169,13 @@ function setupGame() {
     }
     orientation = newOrientation
     for (const position of activeObject[orientation]) {
+      if (cellsArray[position].classList.contains('ghost')) {
+        cellsArray[position].classList.remove('ghost')
+      }
       cellsArray[position].classList.add('active')
       cellsArray[position].classList.add(`${activeShape}`)
     }
+    ghost()
   }
 
   function oneAwayChecker(direction) {
@@ -204,6 +218,7 @@ function setupGame() {
     for (const position of activeObject[orientation]) {
       //console.log(cellsArray[position])
       //console.log(activeObject[orientation])
+      cellsArray[position].classList.remove('ghost')
       cellsArray[position].classList.remove('active')
       Array.from(cellsArray[position].classList).length === 2 ? (cellsArray[position].classList.add('fixed'), console.log('adding fixed')) : console.log('x')
     }
@@ -229,11 +244,18 @@ function setupGame() {
       }
       shapeMover(-1)
 
-    } else if (event.key === 'ArrowUp') {
+    } else if (event.key === 'ArrowUp' || event.key === 'x') {
       if (!oneAwayChecker(1)) {
         return
       }
       shapeRotator(1)
+
+    } else if (event.key === 'z') {
+      if (!oneAwayChecker(-1)) {
+        return
+      }
+      shapeRotator(-1)
+
 
     } else if (event.key === 'ArrowDown') {
       // if (activeObject[orientation].some(x => (x + width) >= gridCellCount)) {
@@ -242,12 +264,14 @@ function setupGame() {
       shapeMover(width)
       currentScore += (1 * (currentLevel + 1))
       scoreDiv.innerHTML = `Total Score: ${currentScore} Points`
-    } else if (event.key === 'x') {
+    } else if (event.code === 'Space') {
       toHold()
+    } else if (event.key === 'c') {
+      hardDrop()
     }
   })
 
-  checker.addEventListener('click', fullRowChecker)
+  // checker.addEventListener('click', fullRowChecker)
 
   function fullRowChecker() {
 
@@ -255,11 +279,11 @@ function setupGame() {
     let linesCleared = 0
 
     let rowArray = []
-    console.log('checking for full rows')
+    //console.log('checking for full rows')
     for (let i = 0; i <= linesCleared; i++) {
       let check = Math.floor((gridCellCount - 1) / width)
       cleared = false
-      console.log('lineCleared loop', linesCleared)
+      //console.log('lineCleared loop', linesCleared)
       for (let i = gridCellCount - 1; i >= 0; i--) {
 
         if (Math.floor(i / width) === check) {
@@ -272,7 +296,6 @@ function setupGame() {
               fullClass.splice(0, 1)
               //console.log(fullClass, x)
               rowMover(x, fullClass)
-
             })
           }
           check--
@@ -287,7 +310,6 @@ function setupGame() {
             currentCombo += 1
             totalLines += 1
             linesCleared += 1
-            console.log(linesCleared)
           }
           rowArray.splice(0, 10)
         }
@@ -303,12 +325,10 @@ function setupGame() {
     //console.log(combo, linesCleared)
 
     const nextShape = eval(shapeArray.shift())
-    console.log(nextShape)
     shapeBuilder(nextShape(point))
     swapped = false
     addShapes()
     nextShapeDiv.innerHTML = `${shapeArray[0]}`
-    console.log(shapeArray)
   }
 
 
@@ -320,7 +340,6 @@ function setupGame() {
 
   function scoreUpdate(linesCleared, level) {
     let score = linesCleared === 0 ? 0 : linesCleared === 1 ? 40 : linesCleared === 2 ? 100 : linesCleared === 3 ? 300 : 1200
-    console.log(score)
     return (score * (1 + level))
   }
 
@@ -332,13 +351,20 @@ function setupGame() {
   //   }
 
 
-
+  //real version
   function addShapes() {
     const shapeNames = ['squareshape', 'lshape', 'jshape', 'tshape', 'ishape', 'sshape', 'zshape']
     const randomOrder = shapeNames.sort(() => Math.random() - 0.5)
     randomOrder.forEach(x => shapeArray.push(x))
-    console.log(shapeArray)
   }
+
+
+  //double test
+  // function addShapes() {
+  //   const shapeNames = ['lshape', 'lshape', 'jshape', 'jshape', 'ishape', 'ishape', 'zshape']
+  //   const randomOrder = shapeNames.sort(() => Math.random() - 0.5)
+  //   randomOrder.forEach(x => shapeArray.push(x))
+  // }
 
 
   function toHold() {
@@ -348,6 +374,10 @@ function setupGame() {
       clearInterval(time)
       for (const position of activeObject[orientation]) {
         cellsArray[position].classList.remove('active')
+        cellsArray[position].classList.remove(`${activeShape}`)
+      }
+      for (const position of ghostArray) {
+        cellsArray[position].classList.remove('ghost')
         cellsArray[position].classList.remove(`${activeShape}`)
       }
       if (!full) {
@@ -368,9 +398,63 @@ function setupGame() {
     }
   }
 
+  function ghost() {
+    for (const position of ghostArray) {
+      //console.log('hello')
+      console.log(position)
+      cellsArray[position].classList.remove('ghost')
+      if (!cellsArray[position].classList.contains('active') && !cellsArray[position].classList.contains('fixed')) {
+        cellsArray[position].classList.remove(`${activeShape}`)
+        //console.log('eggs4')
+      }
+    }
+    let ghostDifference = []
+    const ghostMultiplication = activeObject[orientation].forEach(x => {
+      let ghostTimes = 0
+      while (x < (gridCellCount) && !cellsArray[x].classList.contains('fixed')) {
+        x += width
+        ghostTimes++
+      }
 
+      ghostDifference.push(ghostTimes - 1)
+      ghostDifference.sort((a, b) => b - a)
+    })
+    hardDropCount = ghostDifference[3]
+    ghostArray = activeObject[orientation].map(x => {
+      return x + (hardDropCount * width)
+    })
+    //console.log(ghostDifference)
+    //console.log(ghostArray)
+
+    for (const position of ghostArray) {
+      if (!cellsArray[position].classList.contains('active')) {
+        //console.log('hello 2')
+        cellsArray[position].classList.add('ghost')
+      }
+      //console.log('joe 2')
+      cellsArray[position].classList.add(`${activeShape}`)
+    }
+  }
 
   // shapeMover(width)
+
+  function hardDrop() {
+    clearInterval(time)
+    for (const position of activeObject[orientation]) {
+      cellsArray[position].classList.remove('active')
+      cellsArray[position].classList.remove(`${activeShape}`)
+    }
+    for (const position of ghostArray) {
+      cellsArray[position].classList.remove('ghost')
+      cellsArray[position].classList.add('fixed')
+    }
+    console.log()
+    fullRowChecker()
+    currentScore += (2 * hardDropCount * (currentLevel + 1))
+    scoreDiv.innerHTML = `Total Score: ${currentScore} Points`
+  }
+
+  fullRowChecker()
 
 
 }
