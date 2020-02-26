@@ -1,6 +1,6 @@
 function setupGame() {
   const width = 10
-  const gridCellCount = width * (2 * width)
+  const gridCellCount = width * (2 * width + 2)
   const grid = document.querySelector('.grid')
   const linesDiv = document.querySelector('#lines')
   const comboDiv = document.querySelector('#combo')
@@ -16,6 +16,7 @@ function setupGame() {
   const shapeArray = []
   const holdArray = []
   let ghostArray = []
+  let gameOver = false
   let hardDropCount = 0
   let activeObject
   let activeShape
@@ -110,13 +111,20 @@ function setupGame() {
   // }
 
   function shapeBuilder(input) {
+    if (gameOver) {
+      return
+    }
     orientation = 0
     activeShape = input[0]
     activeObject = input[1]
     //console.log(input[1][0])
     length = Object.keys(activeObject).length
     for (const position of input[1][0]) {
-
+      if (cellsArray[position].classList.contains('fixed')) {
+        clearInterval(time)
+        alert('Game Over')
+        return
+      }
       cellsArray[position].classList.add(`${activeShape}`)
       cellsArray[position].classList.add('active')
     }
@@ -216,6 +224,10 @@ function setupGame() {
 
   function toFixed() {
     for (const position of activeObject[orientation]) {
+      if (gameOverCheck(position)) {
+
+        return
+      }
       //console.log(cellsArray[position])
       //console.log(activeObject[orientation])
       cellsArray[position].classList.remove('ghost')
@@ -232,6 +244,9 @@ function setupGame() {
   }
 
   document.addEventListener('keydown', (event) => {
+    if (gameOver) {
+      return
+    }
     if (event.key === 'ArrowRight') {
       if (boundaryChecker(1)) {
         return
@@ -328,7 +343,7 @@ function setupGame() {
     shapeBuilder(nextShape(point))
     swapped = false
     addShapes()
-    nextShapeDiv.innerHTML = `${shapeArray[0]}`
+    nextShapeDiv.innerHTML = iconDisplayer(shapeArray[0])
   }
 
 
@@ -384,7 +399,7 @@ function setupGame() {
         holdArray.push(activeShape)
         full = true
         swapped = true
-        holdShapeDiv.innerHTML = `${holdArray[0]}`
+        holdShapeDiv.innerHTML = iconDisplayer(holdArray[0])
         const nextShape = eval(shapeArray.shift())
         shapeBuilder(nextShape(point))
       } else if (full && !swapped) {
@@ -393,7 +408,7 @@ function setupGame() {
         swapped = true
         const nextShape = eval(holdArray.shift())
         shapeBuilder(nextShape(point))
-        holdShapeDiv.innerHTML = `${holdArray[0]}`
+        holdShapeDiv.innerHTML = iconDisplayer(holdArray[0])
       }
     }
   }
@@ -440,19 +455,47 @@ function setupGame() {
 
   function hardDrop() {
     clearInterval(time)
-    for (const position of activeObject[orientation]) {
-      cellsArray[position].classList.remove('active')
-      cellsArray[position].classList.remove(`${activeShape}`)
-    }
     for (const position of ghostArray) {
+      if (gameOverCheck(position)) {
+        return 
+      }
       cellsArray[position].classList.remove('ghost')
       cellsArray[position].classList.add('fixed')
     }
-    console.log()
+    for (const position of activeObject[orientation]) {
+      cellsArray[position].classList.remove('active')
+      if (!cellsArray[position].classList.contains('fixed')) {
+        cellsArray[position].classList.remove(`${activeShape}`)
+      }
+    }
+
     fullRowChecker()
     currentScore += (2 * hardDropCount * (currentLevel + 1))
     scoreDiv.innerHTML = `Total Score: ${currentScore} Points`
   }
+
+
+  function gameOverCheck(position) {
+    if (position < 2 * width) {
+      clearInterval(time)
+      gameOver = true
+      alert('Game Over')
+  }
+}
+
+
+function iconDisplayer(shape) {
+  return `<img src="assets/${shape}.png">`
+}
+
+
+
+
+
+
+
+
+
 
   fullRowChecker()
 
