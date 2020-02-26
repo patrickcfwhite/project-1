@@ -1,6 +1,6 @@
 function setupGame() {
   const width = 10
-  const gridCellCount = width * (2 * width + 2)
+  const gridCellCount = width * (2 * width + 4)
   const grid = document.querySelector('.grid')
   const linesDiv = document.querySelector('#lines')
   const comboDiv = document.querySelector('#combo')
@@ -8,7 +8,17 @@ function setupGame() {
   const levelDiv = document.querySelector('#level')
   const nextShapeDiv = document.querySelector('#nextshape')
   const holdShapeDiv = document.querySelector('#holdshape')
+  const audio1 = document.querySelector('#audio1')
+  const audio2 = document.querySelector('#audio2')
+  const audio3 = document.querySelector('#audio3')
+  const audio4 = document.querySelector('#audio4')
+  const audio5 = document.querySelector('#audio4')
 
+  audio2.volume = 0.18
+  audio3.volume = 0.18
+  audio4.volume = 0.18
+  audio5.volume = 0.18
+  audio1.volume = 0.25
   const buttons = document.querySelectorAll('.buttons')
   const checker = document.querySelector('#check')
 
@@ -29,7 +39,7 @@ function setupGame() {
   let currentLevel = Math.floor(totalLines / 10)
   let full = false
   let swapped = false
-  addShapes()
+
   linesDiv.innerHTML = `Lines Cleared: ${totalLines}`
   comboDiv.innerHTML = `Combo: ${currentCombo} x`
   scoreDiv.innerHTML = `Total Score: ${currentScore} Points`
@@ -89,6 +99,9 @@ function setupGame() {
   for (let i = 0; i < gridCellCount; i++) {
     const cell = document.createElement('div')
     cell.classList.add('cell')
+    if (i < width * 4) {
+      cell.id = `hidden${i}`
+    }
     grid.appendChild(cell)
     cellsArray.push(cell)
   }
@@ -131,7 +144,7 @@ function setupGame() {
     ghost()
     time = setInterval(() => {
       shapeMover(width)
-    }, (1000 - ((currentLevel + 1) * 20)))
+    }, (300 - ((currentLevel + 1) * 20)))
     return
   }
 
@@ -225,7 +238,6 @@ function setupGame() {
   function toFixed() {
     for (const position of activeObject[orientation]) {
       if (gameOverCheck(position)) {
-
         return
       }
       //console.log(cellsArray[position])
@@ -252,24 +264,28 @@ function setupGame() {
         return
       }
       shapeMover(1)
+      updateAudio(audio3, 'move1')
 
     } else if (event.key === 'ArrowLeft') {
       if (boundaryChecker()) {
         return
       }
       shapeMover(-1)
+      updateAudio(audio3, 'move1')
 
     } else if (event.key === 'ArrowUp' || event.key === 'x') {
       if (!oneAwayChecker(1)) {
         return
       }
       shapeRotator(1)
+      updateAudio(audio4, 'spin')
 
     } else if (event.key === 'z') {
       if (!oneAwayChecker(-1)) {
         return
       }
       shapeRotator(-1)
+      updateAudio(audio4, 'spin')
 
 
     } else if (event.key === 'ArrowDown') {
@@ -278,6 +294,7 @@ function setupGame() {
       // }
       shapeMover(width)
       currentScore += (1 * (currentLevel + 1))
+      console.log(currentScore)
       scoreDiv.innerHTML = `Total Score: ${currentScore} Points`
     } else if (event.code === 'Space') {
       toHold()
@@ -292,7 +309,8 @@ function setupGame() {
 
     let cleared = false
     let linesCleared = 0
-
+    const previousLevel = currentLevel
+    console.log(previousLevel)
     let rowArray = []
     //console.log('checking for full rows')
     for (let i = 0; i <= linesCleared; i++) {
@@ -317,10 +335,10 @@ function setupGame() {
           if (rowArray.every(x => x.classList.contains('fixed'))) {
             rowArray.forEach(x => {
               let fullClass = Array.from(x.classList)
+              console.log(fullClass)
               fullClass.splice(0, 1)
               x.classList.remove(...fullClass)
               cleared = true
-
             })
             currentCombo += 1
             totalLines += 1
@@ -330,17 +348,28 @@ function setupGame() {
         }
       }
     }
-    currentScore += scoreUpdate(linesCleared, currentLevel) * (currentCombo - 1)
+    currentScore += (scoreUpdate(linesCleared, currentLevel) * (currentCombo - 1))
+    console.log(currentScore)
     currentLevel = Math.floor(totalLines / 10)
+    console.log(previousLevel, currentLevel, currentScore)
     linesCleared === 0 ? currentCombo = 1 : currentCombo
     linesDiv.innerHTML = `Lines Cleared: ${totalLines}`
     comboDiv.innerHTML = `Combo: ${currentCombo} x`
     scoreDiv.innerHTML = `Total Score: ${currentScore} Points`
     levelDiv.innerHTML = `Level: ${currentLevel}`
+    if (previousLevel !== currentLevel) {
+      updateAudio(audio1, ['level', currentLevel].join(''))
+      levelDiv.addClass('levelup')
+    }
     //console.log(combo, linesCleared)
 
-    const nextShape = eval(shapeArray.shift())
-    shapeBuilder(nextShape(point))
+    const nextShape = shapeArray.shift()
+    const nextShapeFunction = eval(nextShape)
+    nextShape === 'ishape' ? shapeBuilder(nextShapeFunction(point)) : shapeBuilder(nextShapeFunction(point + width))
+    if (previousLevel !== currentLevel) {
+      updateAudio(audio1, ['level', currentLevel].join(''))
+      levelDiv.addClass('levelup')
+    }
     swapped = false
     addShapes()
     nextShapeDiv.innerHTML = iconDisplayer(shapeArray[0])
@@ -354,8 +383,9 @@ function setupGame() {
   }
 
   function scoreUpdate(linesCleared, level) {
-    let score = linesCleared === 0 ? 0 : linesCleared === 1 ? 40 : linesCleared === 2 ? 100 : linesCleared === 3 ? 300 : 1200
-    return (score * (1 + level))
+    let score = linesCleared === 0 ? ([0, updateAudio(audio5, 'linedrop')]) : linesCleared === 1 ?
+      ([40, updateAudio(audio5, 'lineclear')]) : linesCleared === 2 ? ([100, updateAudio(audio5, 'lineclear')]) : linesCleared === 3 ? ([300, updateAudio(audio5, 'lineclear')]) : ([1200, updateAudio(audio5, 'tetris')])
+    return (score[0] * (1 + level))
   }
 
 
@@ -386,6 +416,7 @@ function setupGame() {
     if (swapped) {
       return
     } else {
+      updateAudio(audio2, 'tohold')
       clearInterval(time)
       for (const position of activeObject[orientation]) {
         cellsArray[position].classList.remove('active')
@@ -457,7 +488,7 @@ function setupGame() {
     clearInterval(time)
     for (const position of ghostArray) {
       if (gameOverCheck(position)) {
-        return 
+        return
       }
       cellsArray[position].classList.remove('ghost')
       cellsArray[position].classList.add('fixed')
@@ -477,16 +508,28 @@ function setupGame() {
 
   function gameOverCheck(position) {
     if (position < 2 * width) {
+      updateAudio(audio1, 'gameover')
       clearInterval(time)
       gameOver = true
       alert('Game Over')
+    }
   }
-}
 
 
-function iconDisplayer(shape) {
-  return `<img src="assets/${shape}.png">`
-}
+  function iconDisplayer(shape) {
+    return `<img src="assets/${shape}.png">`
+  }
+
+
+  function updateAudio(audio, input) {
+    audio.src = `assets/${input}.wav`
+    if (!audio.isPlaying) {
+      audio.play()
+      return
+    }
+    
+    
+  }
 
 
 
@@ -494,9 +537,7 @@ function iconDisplayer(shape) {
 
 
 
-
-
-
+  addShapes()
   fullRowChecker()
 
 

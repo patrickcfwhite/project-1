@@ -8,6 +8,11 @@
   <title>Project 1: Tetris</title>
 </head>
 <body>
+  <audio id="audio1" src=""></audio>
+  <audio id="audio2" src=""></audio>
+  <audio id="audio3" src=""></audio>
+  <audio id="audio4" src=""></audio>
+  <audio id="audio5" src=""></audio>
 <header>
   <h1>TETRIS</h1>
 </header>
@@ -17,18 +22,52 @@
       <h2>Hold:</h2>
     <div id="holdshape" class="squaredisplay"></div>
     </div>
+    <div class="controlwrapper">
+      <h2>Controls:</h2>
+      <div id="controls">
+      <span><p>Arrow Keys:</p><img class="icons" src="assets/icons/left.png" alt="">
+      <img class="icons" src="assets/icons/down.png" alt="">
+      <img class="icons" src="assets/icons/right.png" alt=""></span>
+      <span><p>Z: <img class="icons" src="assets/icons/turncounter.png" alt="">
+          X: <img class="icons" src="assets/icons/turnclock.png" alt=""></p></span>
+      <p>C: <img class="icons" src="assets/icons/drop.png" style="transform: rotate(-45deg);" alt=""></p>
+      <p>Space Bar: <img class="icons" src="assets/icons/swap2.png" alt=""></p>
+    </div>
+  </div>
+    <div class="infowrapper">
     <div id="level"></div>
     <div id="lines"></div>
+  </div>
   </aside>
 <div class="grid"></div>
 <aside id="right">
+  
 <div class="shapewrapper">
   <h2>Next Shape:</h2>
 <div id="nextshape" class="squaredisplay"></div>
 </div>
+<div class="highscorewrapper">
+  <h2>High Scores:</h2>
+  <div id="highscores">
+<ol>
+  <li>THRILLHO: 1,000,000</li>
+  <li>ELBARTO: 750,000</li>
+  <li>MARTIN: 700,000</li>
+  <li>TODDFLAN: 650,000</li>
+  <li>JIMBO: 500,000</li>
+  <li>MARGE: 450,000</li>
+  <li>LENNY: 300,000</li>
+  <li>CARL: 150,000</li>
+  <li>NED: 1000</li>
+  <li>HOMER: 200</li>
+</ol>
+</div>
+</div>
+<div class="infowrapper">
 <div id="combo"></div>
 <div id="score"></div>
 <div id="nexthighscore"></div>
+</div>
 </aside>
 </main>
 
