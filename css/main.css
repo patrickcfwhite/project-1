@@ -23,6 +23,20 @@ body {
   background: linear-gradient(134deg, #71b19d, #a4d7da, #a4d7da, #ece5cd);
 }
 
+section {
+  background: transparent;
+  font-size: 1.2em;
+  position: absolute;
+  text-align: center;
+  border: 2px solid black;
+  top: 136px;
+  border-radius: 4px;
+  width: 300px;
+  height: 155px;
+  backdrop-filter: blur(2px);
+  line-height: 155px;
+}
+
 main {
   display: flex;
   flex-direction: row;
@@ -163,6 +177,9 @@ div[id*="hidden"] {
   height: 100%;
 }
 
+.invisible {
+  display: none;
+}
 
 
 #level {
@@ -190,5 +207,16 @@ transition: all .07s ease-in-out;
   padding: 2px;
   text-align: left;
   font-size: 1em;
-  width: 220px
+  width: 220px;
+  line-height: 27px;
+}
+
+#playername {
+  background: transparent;
+  text-transform: uppercase;
+  color: rgba(0,0,0,0.8)
+}
+
+::placeholder {
+  color: rgba(0,0,0,0.6)
 }

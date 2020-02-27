@@ -13,12 +13,16 @@ function setupGame() {
   const audio3 = document.querySelector('#audio3')
   const audio4 = document.querySelector('#audio4')
   const audio5 = document.querySelector('#audio4')
+  const startButton = document.querySelector('#startgame')
+  const nameInput = document.querySelector('#playername')
+  const startScreen = document.querySelector('section')
+  let newName
 
   audio2.volume = 0.18
   audio3.volume = 0.18
   audio4.volume = 0.18
-  audio5.volume = 0.18
-  audio1.volume = 0.25
+  audio5.volume = 0.20
+  audio1.volume = 0.28
   const buttons = document.querySelectorAll('.buttons')
   const checker = document.querySelector('#check')
 
@@ -40,11 +44,18 @@ function setupGame() {
   let full = false
   let swapped = false
 
+  let highScores = [
+    { name: 'THRILLHO', score: 100000 }, { name: 'BART', score: 75000 },
+    { name: 'MARTIN', score: 70000 }, { name: 'TODDFLAN', score: 65000 },
+    { name: 'JIMBO', score: 50000 }, { name: 'MARGE', score: 45000 },
+    { name: 'LENNY', score: 30000 }, { name: 'CARL', score: 15000 },
+    { name: 'HOMER', score: 5000 }, { name: 'NED', score: 2000 }
+  ]
+
   linesDiv.innerHTML = `Lines Cleared: ${totalLines}`
   comboDiv.innerHTML = `Combo: ${currentCombo} x`
   scoreDiv.innerHTML = `Total Score: ${currentScore} Points`
   levelDiv.innerHTML = `Level: ${currentLevel}`
-  nextShapeDiv.innerHTML = `${shapeArray[1]}`
 
 
 
@@ -107,6 +118,18 @@ function setupGame() {
   }
 
 
+  startButton.addEventListener('click', () => {
+    if (nameInput.value === '') {
+      return
+    }
+    newName = nameInput.value.toUpperCase()
+    addShapes()
+    updateScore()
+    fullRowChecker()
+    startScreen.classList.add('invisible')
+  })
+
+
   // buttons for testing
 
   // for (const button of buttons) {
@@ -134,7 +157,9 @@ function setupGame() {
     length = Object.keys(activeObject).length
     for (const position of input[1][0]) {
       if (cellsArray[position].classList.contains('fixed')) {
+        gameOver = true
         clearInterval(time)
+        updateScore()
         alert('Game Over')
         return
       }
@@ -294,7 +319,7 @@ function setupGame() {
       // }
       shapeMover(width)
       currentScore += (1 * (currentLevel + 1))
-      console.log(currentScore)
+      //console.log(currentScore)
       scoreDiv.innerHTML = `Total Score: ${currentScore} Points`
     } else if (event.code === 'Space') {
       toHold()
@@ -310,7 +335,7 @@ function setupGame() {
     let cleared = false
     let linesCleared = 0
     const previousLevel = currentLevel
-    console.log(previousLevel)
+    //console.log(previousLevel)
     let rowArray = []
     //console.log('checking for full rows')
     for (let i = 0; i <= linesCleared; i++) {
@@ -335,7 +360,7 @@ function setupGame() {
           if (rowArray.every(x => x.classList.contains('fixed'))) {
             rowArray.forEach(x => {
               let fullClass = Array.from(x.classList)
-              console.log(fullClass)
+              //console.log(fullClass)
               fullClass.splice(0, 1)
               x.classList.remove(...fullClass)
               cleared = true
@@ -349,18 +374,15 @@ function setupGame() {
       }
     }
     currentScore += (scoreUpdate(linesCleared, currentLevel) * (currentCombo - 1))
-    console.log(currentScore)
+    //console.log(currentScore)
     currentLevel = Math.floor(totalLines / 10)
-    console.log(previousLevel, currentLevel, currentScore)
+    //console.log(previousLevel, currentLevel, currentScore)
+    updateScore()
     linesCleared === 0 ? currentCombo = 1 : currentCombo
     linesDiv.innerHTML = `Lines Cleared: ${totalLines}`
     comboDiv.innerHTML = `Combo: ${currentCombo} x`
     scoreDiv.innerHTML = `Total Score: ${currentScore} Points`
     levelDiv.innerHTML = `Level: ${currentLevel}`
-    if (previousLevel !== currentLevel) {
-      updateAudio(audio1, ['level', currentLevel].join(''))
-      levelDiv.addClass('levelup')
-    }
     //console.log(combo, linesCleared)
 
     const nextShape = shapeArray.shift()
@@ -387,6 +409,9 @@ function setupGame() {
       ([40, updateAudio(audio5, 'lineclear')]) : linesCleared === 2 ? ([100, updateAudio(audio5, 'lineclear')]) : linesCleared === 3 ? ([300, updateAudio(audio5, 'lineclear')]) : ([1200, updateAudio(audio5, 'tetris')])
     return (score[0] * (1 + level))
   }
+
+
+
 
 
   // const nextPosition = activeObject[orientation].map(x => x + direction)
@@ -447,7 +472,7 @@ function setupGame() {
   function ghost() {
     for (const position of ghostArray) {
       //console.log('hello')
-      console.log(position)
+     // console.log(position)
       cellsArray[position].classList.remove('ghost')
       if (!cellsArray[position].classList.contains('active') && !cellsArray[position].classList.contains('fixed')) {
         cellsArray[position].classList.remove(`${activeShape}`)
@@ -511,6 +536,7 @@ function setupGame() {
       updateAudio(audio1, 'gameover')
       clearInterval(time)
       gameOver = true
+      updateScore()
       alert('Game Over')
     }
   }
@@ -532,13 +558,55 @@ function setupGame() {
   }
 
 
+  const scoresList = document.querySelector('ol')
+  const playButton = document.querySelector('#startgame')
+  
+
+  if (localStorage) {
+    const players = JSON.parse(localStorage.getItem('players'))
+    if (players) {
+      highScores = players
+      renderList(highScores, scoresList)
+    }
+  }
+
+
+  function renderList(scores, scoresList) {
+
+    const array = scores.sort((playerA, playerB) => playerB.score - playerA.score).map(player => {
+      return `<li>${player.name}: ${player.score}</li>`
+    })
+
+    scoresList.innerHTML = array.slice(0, 10).join('')
+  }
+
+
+
+  function updateScore() {
+    for (const score of highScores) {
+      if (gameOver && score.active) {
+        score.active = false
+      } else if (score.active === true) {
+        highScores.splice(highScores.indexOf(score), 1)
+      }
+      
+    }
+    console.log(highScores)
+    if (!gameOver) {
+      const player = { name: newName, score: currentScore, active: true }
+      highScores.push(player)
+    }
+    // }
+    renderList(highScores, scoresList)
+    if (localStorage) {
+      localStorage.setItem('players', JSON.stringify(highScores))
+    }
+  }
 
 
 
 
-
-  addShapes()
-  fullRowChecker()
+  
 
 
 }
