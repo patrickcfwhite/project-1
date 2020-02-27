@@ -13,6 +13,8 @@ function setupGame() {
   const audio3 = document.querySelector('#audio3')
   const audio4 = document.querySelector('#audio4')
   const audio5 = document.querySelector('#audio4')
+  const allAudio = document.querySelectorAll('audio')
+  const toggleAudio = document.querySelector('#toggleaudio')
   const startButton = document.querySelector('#startgame')
   const nameInput = document.querySelector('#playername')
   const startScreen = document.querySelector('section')
@@ -118,6 +120,8 @@ function setupGame() {
   }
 
 
+  
+
   startButton.addEventListener('click', () => {
     if (nameInput.value === '') {
       return
@@ -128,6 +132,15 @@ function setupGame() {
     fullRowChecker()
     startScreen.classList.add('invisible')
   })
+
+  
+  toggleAudio.addEventListener('click', () => {
+    for (const audio of allAudio) {
+      audio.muted = audio.muted ? false : true
+    }
+  })
+
+
 
 
   // buttons for testing
@@ -390,7 +403,8 @@ function setupGame() {
     nextShape === 'ishape' ? shapeBuilder(nextShapeFunction(point)) : shapeBuilder(nextShapeFunction(point + width))
     if (previousLevel !== currentLevel) {
       updateAudio(audio1, ['level', currentLevel].join(''))
-      levelDiv.addClass('levelup')
+      levelDiv.classList.add('levelup')
+      levelDiv.addEventListener('transitionend', removeTransition)
     }
     swapped = false
     addShapes()
@@ -574,9 +588,9 @@ function setupGame() {
   function renderList(scores, scoresList) {
 
     const array = scores.sort((playerA, playerB) => playerB.score - playerA.score).map(player => {
-      return `<li>${player.name}: ${player.score}</li>`
+      return player.active === true ? `<li id="playerlist">${player.name}: ${player.score}</li>` :
+      `<li>${player.name}: ${player.score}</li>`
     })
-
     scoresList.innerHTML = array.slice(0, 10).join('')
   }
 
@@ -603,7 +617,10 @@ function setupGame() {
     }
   }
 
-
+  function removeTransition(e) {
+    if (e.propertyName !== 'transform') return
+    this.classList.remove('levelup')
+  }
 
 
   

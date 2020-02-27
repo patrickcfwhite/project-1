@@ -161,7 +161,10 @@ div[id*="hidden"] {
   transition: background-color 1.2s;
 }
 
-
+.levelup {
+  transform: scale(1.8);
+  color: red;
+}
 
 .squaredisplay {
   height: 100px;
@@ -183,7 +186,7 @@ div[id*="hidden"] {
 
 
 #level {
-transition: all .07s ease-in-out;
+transition: all 2.2s ease-in-out;
 }
 
 .icons {
@@ -219,4 +222,29 @@ transition: all .07s ease-in-out;
 
 ::placeholder {
   color: rgba(0,0,0,0.6)
+}
+
+#toggleaudio {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  height: 40px;
+  width: 40px;
+}
+
+#playerlist {
+  transform: scale(1.05);
+  animation: 2s infinite bounceIn
+}
+
+@keyframes bounceIn {
+  0%, 100% {
+    transform: translateX(0px)
+  }
+  55% {
+    transform: translateX(2px)
+  }
+  90% {
+    transform: translateX(-1px)
+  }
 }
