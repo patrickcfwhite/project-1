@@ -5,6 +5,7 @@ function setupGame() {
   const linesDiv = document.querySelector('#lines')
   const comboDiv = document.querySelector('#combo')
   const scoreDiv = document.querySelector('#score')
+  const endScoreDiv = document.querySelector('#endscore')
   const levelDiv = document.querySelector('#level')
   const nextShapeDiv = document.querySelector('#nextshape')
   const holdShapeDiv = document.querySelector('#holdshape')
@@ -16,8 +17,10 @@ function setupGame() {
   const allAudio = document.querySelectorAll('audio')
   const toggleAudio = document.querySelector('#toggleaudio')
   const startButton = document.querySelector('#startgame')
+  const restartButton = document.querySelector('#restartgame')
   const nameInput = document.querySelector('#playername')
-  const startScreen = document.querySelector('section')
+  const startScreen = document.querySelector('#beginning')
+  const endScreen = document.querySelector('#end')
   let newName
 
   audio2.volume = 0.18
@@ -45,6 +48,7 @@ function setupGame() {
   let currentLevel = Math.floor(totalLines / 10)
   let full = false
   let swapped = false
+
 
   let highScores = [
     { name: 'THRILLHO', score: 100000 }, { name: 'BART', score: 75000 },
@@ -109,18 +113,19 @@ function setupGame() {
     }]
   }
 
-  for (let i = 0; i < gridCellCount; i++) {
-    const cell = document.createElement('div')
-    cell.classList.add('cell')
-    if (i < width * 4) {
-      cell.id = `hidden${i}`
+  function generateGrid() {
+    for (let i = 0; i < gridCellCount; i++) {
+      const cell = document.createElement('div')
+      cell.classList.add('cell')
+      if (i < width * 4) {
+        cell.id = `hidden${i}`
+      }
+      grid.appendChild(cell)
+      cellsArray.push(cell)
     }
-    grid.appendChild(cell)
-    cellsArray.push(cell)
   }
 
 
-  
 
   startButton.addEventListener('click', () => {
     if (nameInput.value === '') {
@@ -131,9 +136,35 @@ function setupGame() {
     updateScore()
     fullRowChecker()
     startScreen.classList.add('invisible')
+
   })
 
-  
+  restartButton.addEventListener('click', () => {
+    shapeArray.splice(0, shapeArray.length)
+    holdArray.splice(0, 1)
+    ghostArray = []
+    gameOver = false
+    hardDropCount = 0
+    activeObject
+    activeShape
+    orientation
+    totalLines = 0
+    currentCombo = 1
+    currentScore = 0
+    full = false
+    swapped = false
+    for (const cell in cellsArray) {
+      let fullClass = cellsArray[cell].classList
+      cellsArray[cell].classList.remove(...fullClass)
+      cellsArray[cell].classList.add('cell')
+    }
+    addShapes()
+    updateScore()
+    fullRowChecker()
+    endScreen.classList.toggle('invisible')
+  })
+
+
   toggleAudio.addEventListener('click', () => {
     for (const audio of allAudio) {
       audio.muted = audio.muted ? false : true
@@ -170,10 +201,7 @@ function setupGame() {
     length = Object.keys(activeObject).length
     for (const position of input[1][0]) {
       if (cellsArray[position].classList.contains('fixed')) {
-        gameOver = true
-        clearInterval(time)
-        updateScore()
-        alert('Game Over')
+        handleGameOver()
         return
       }
       cellsArray[position].classList.add(`${activeShape}`)
@@ -182,7 +210,7 @@ function setupGame() {
     ghost()
     time = setInterval(() => {
       shapeMover(width)
-    }, (300 - ((currentLevel + 1) * 20)))
+    }, (700 - ((currentLevel + 1) * 48)))
     return
   }
 
@@ -276,7 +304,8 @@ function setupGame() {
   function toFixed() {
     for (const position of activeObject[orientation]) {
       if (gameOverCheck(position)) {
-        return
+        handleGameOver()
+        break
       }
       //console.log(cellsArray[position])
       //console.log(activeObject[orientation])
@@ -486,7 +515,7 @@ function setupGame() {
   function ghost() {
     for (const position of ghostArray) {
       //console.log('hello')
-     // console.log(position)
+      // console.log(position)
       cellsArray[position].classList.remove('ghost')
       if (!cellsArray[position].classList.contains('active') && !cellsArray[position].classList.contains('fixed')) {
         cellsArray[position].classList.remove(`${activeShape}`)
@@ -527,7 +556,8 @@ function setupGame() {
     clearInterval(time)
     for (const position of ghostArray) {
       if (gameOverCheck(position)) {
-        return
+        handleGameOver()
+        break
       }
       cellsArray[position].classList.remove('ghost')
       cellsArray[position].classList.add('fixed')
@@ -547,11 +577,8 @@ function setupGame() {
 
   function gameOverCheck(position) {
     if (position < 2 * width) {
-      updateAudio(audio1, 'gameover')
-      clearInterval(time)
       gameOver = true
-      updateScore()
-      alert('Game Over')
+      return true
     }
   }
 
@@ -567,14 +594,14 @@ function setupGame() {
       audio.play()
       return
     }
-    
-    
+
+
   }
 
 
   const scoresList = document.querySelector('ol')
   const playButton = document.querySelector('#startgame')
-  
+
 
   if (localStorage) {
     const players = JSON.parse(localStorage.getItem('players'))
@@ -589,7 +616,7 @@ function setupGame() {
 
     const array = scores.sort((playerA, playerB) => playerB.score - playerA.score).map(player => {
       return player.active === true ? `<li id="playerlist">${player.name}: ${player.score}</li>` :
-      `<li>${player.name}: ${player.score}</li>`
+        `<li>${player.name}: ${player.score}</li>`
     })
     scoresList.innerHTML = array.slice(0, 10).join('')
   }
@@ -603,7 +630,7 @@ function setupGame() {
       } else if (score.active === true) {
         highScores.splice(highScores.indexOf(score), 1)
       }
-      
+
     }
     console.log(highScores)
     if (!gameOver) {
@@ -623,9 +650,15 @@ function setupGame() {
   }
 
 
-  
+  function handleGameOver() {
+    clearInterval(time)
+    updateScore()
+    endScoreDiv.innerHTML = `Final Score: ${currentScore}`
+    endScreen.classList.toggle('invisible')
+    return
+  }
 
-
+generateGrid()
 }
 
 window.addEventListener('DOMContentLoaded', setupGame)

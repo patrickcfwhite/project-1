@@ -18,10 +18,17 @@
   <img src="assets/icons/audio.png" id="toggleaudio">
 </header>
 <main>
-  <section>
-      Name: <input type="text" name="playername" id="playername" placeholder="SANTOS L. HALPER">
+  <section id="beginning">
+      <h2>Enter your Name:</h2>
+      <input type="text" name="playername" id="playername" placeholder="SANTOS L. HALPER">
       <button id="startgame">Begin Game</button>
   </section>
+  <section id="end" class="invisible">
+    <h2>Game Over!</h2>
+    <h2 id="endscore"></h2>
+    <h2>Play again?</h2>
+    <button id="restartgame">Begin Game</button>
+</section>
   <aside id="left">
     <div class="shapewrapper">
       <h2>Hold:</h2>
