@@ -210,7 +210,7 @@ function setupGame() {
     ghost()
     time = setInterval(() => {
       shapeMover(width)
-    }, (700 - ((currentLevel + 1) * 48)))
+    }, (700 - ((currentLevel + 1) * (72 - currentLevel))))
     return
   }
 
@@ -431,7 +431,7 @@ function setupGame() {
     const nextShapeFunction = eval(nextShape)
     nextShape === 'ishape' ? shapeBuilder(nextShapeFunction(point)) : shapeBuilder(nextShapeFunction(point + width))
     if (previousLevel !== currentLevel) {
-      updateAudio(audio1, ['level', currentLevel].join(''))
+      updateAudio(audio1, ['level', (currentLevel % 8)].join(''))
       levelDiv.classList.add('levelup')
       levelDiv.addEventListener('transitionend', removeTransition)
     }
@@ -652,6 +652,7 @@ function setupGame() {
 
   function handleGameOver() {
     clearInterval(time)
+    updateAudio(audio1, 'gameover')
     updateScore()
     endScoreDiv.innerHTML = `Final Score: ${currentScore}`
     endScreen.classList.toggle('invisible')
