@@ -1,6 +1,5 @@
 function setupGame() {
-  const width = 10
-  const gridCellCount = width * (2 * width + 4)
+
   const grid = document.querySelector('.grid')
   const linesDiv = document.querySelector('#lines')
   const comboDiv = document.querySelector('#combo')
@@ -21,35 +20,36 @@ function setupGame() {
   const nameInput = document.querySelector('#playername')
   const startScreen = document.querySelector('#beginning')
   const endScreen = document.querySelector('#end')
-  let newName
+  const scoresList = document.querySelector('ol')
+  const playButton = document.querySelector('#startgame')
 
   audio2.volume = 0.18
   audio3.volume = 0.18
   audio4.volume = 0.18
   audio5.volume = 0.20
   audio1.volume = 0.28
-  const buttons = document.querySelectorAll('.buttons')
-  const checker = document.querySelector('#check')
 
   const cellsArray = []
   const shapeArray = []
   const holdArray = []
+  const width = 10
+  const gridCellCount = width * (2 * width + 4)
+  const point = 15
   let ghostArray = []
-  let gameOver = false
-  let hardDropCount = 0
   let activeObject
   let activeShape
   let orientation
-  const point = 15
+  let newName
   let length
   let totalLines = 0
-  let currentCombo = 1
   let currentScore = 0
+  let hardDropCount = 0
+  let currentCombo = 1
   let currentLevel = Math.floor(totalLines / 10)
   let full = false
   let swapped = false
-
-
+  let gameOver = false
+  
   let highScores = [
     { name: 'THRILLHO', score: 100000 }, { name: 'BART', score: 75000 },
     { name: 'MARTIN', score: 70000 }, { name: 'TODDFLAN', score: 65000 },
@@ -58,13 +58,105 @@ function setupGame() {
     { name: 'HOMER', score: 5000 }, { name: 'NED', score: 2000 }
   ]
 
+  if (localStorage) {
+    const players = JSON.parse(localStorage.getItem('players'))
+    if (players) {
+      highScores = players
+      renderList(highScores, scoresList)
+    }
+  }
+
   linesDiv.innerHTML = `Lines Cleared: ${totalLines}`
   comboDiv.innerHTML = `Combo: ${currentCombo} x`
   scoreDiv.innerHTML = `Total Score: ${currentScore} Points`
   levelDiv.innerHTML = `Level: ${currentLevel}`
 
+  startButton.addEventListener('click', () => {
+    if (nameInput.value === '') {
+      return
+    }
+    newName = nameInput.value.toUpperCase()
+    addShapes()
+    updateScore()
+    fullRowChecker()
+    startScreen.classList.add('invisible')
+  })
+
+  restartButton.addEventListener('click', () => {
+    shapeArray.splice(0, shapeArray.length)
+    holdArray.splice(0, 1)
+    ghostArray = []
+    gameOver = false
+    hardDropCount = 0
+    activeObject
+    activeShape
+    orientation
+    totalLines = 0
+    currentCombo = 1
+    currentScore = 0
+    full = false
+    swapped = false
+    for (const cell in cellsArray) {
+      const fullClass = cellsArray[cell].classList
+      cellsArray[cell].classList.remove(...fullClass)
+      cellsArray[cell].classList.add('cell')
+    }
+    addShapes()
+    updateScore()
+    fullRowChecker()
+    endScreen.classList.toggle('invisible')
+  })
+
+  toggleAudio.addEventListener('click', () => {
+    for (const audio of allAudio) {
+      audio.muted = audio.muted ? false : true
+    }
+  })
+
+  document.addEventListener('keydown', (event) => {
+    if (gameOver) {
+      return
+    }
+    if (event.key === 'ArrowRight') {
+      if (boundaryChecker(1)) {
+        return
+      }
+      shapeMover(1)
+      updateAudio(audio3, 'move1')
+
+    } else if (event.key === 'ArrowLeft') {
+      if (boundaryChecker()) {
+        return
+      }
+      shapeMover(-1)
+      updateAudio(audio3, 'move1')
+
+    } else if (event.key === 'ArrowUp' || event.key === 'x') {
+      if (!oneAwayChecker(1)) {
+        return
+      }
+      shapeRotator(1)
+      updateAudio(audio4, 'spin')
+
+    } else if (event.key === 'z') {
+      if (!oneAwayChecker(-1)) {
+        return
+      }
+      shapeRotator(-1)
+      updateAudio(audio4, 'spin')
 
 
+    } else if (event.key === 'ArrowDown') {
+      shapeMover(width)
+      currentScore += (1 * (currentLevel + 1))
+      scoreDiv.innerHTML = `Total Score: ${currentScore} Points`
+    } else if (event.code === 'Space') {
+      toHold()
+    } else if (event.key === 'c') {
+      hardDrop()
+    }
+  })
+  
   function squareshape(x) {
     return ['squareshape', { 0: [x, (x + 1), (x + width), (x + width + 1)] }]
   }
@@ -125,70 +217,11 @@ function setupGame() {
     }
   }
 
-
-
-  startButton.addEventListener('click', () => {
-    if (nameInput.value === '') {
-      return
-    }
-    newName = nameInput.value.toUpperCase()
-    addShapes()
-    updateScore()
-    fullRowChecker()
-    startScreen.classList.add('invisible')
-
-  })
-
-  restartButton.addEventListener('click', () => {
-    shapeArray.splice(0, shapeArray.length)
-    holdArray.splice(0, 1)
-    ghostArray = []
-    gameOver = false
-    hardDropCount = 0
-    activeObject
-    activeShape
-    orientation
-    totalLines = 0
-    currentCombo = 1
-    currentScore = 0
-    full = false
-    swapped = false
-    for (const cell in cellsArray) {
-      let fullClass = cellsArray[cell].classList
-      cellsArray[cell].classList.remove(...fullClass)
-      cellsArray[cell].classList.add('cell')
-    }
-    addShapes()
-    updateScore()
-    fullRowChecker()
-    endScreen.classList.toggle('invisible')
-  })
-
-
-  toggleAudio.addEventListener('click', () => {
-    for (const audio of allAudio) {
-      audio.muted = audio.muted ? false : true
-    }
-  })
-
-
-
-
-  // buttons for testing
-
-  // for (const button of buttons) {
-  //   if (button.classList.contains('factory')) {
-  //     button.addEventListener('click', () => {
-  //       const fn = eval(button.id)
-  //       shapeBuilder(fn(point))
-  //     })
-  //   } else if (button.classList.contains('function')) {
-  //     button.addEventListener('click', () => {
-  //       const fn = eval(button.id)
-  //       fn()
-  //     })
-  //   }
-  // }
+  function addShapes() {
+    const shapeNames = ['squareshape', 'lshape', 'jshape', 'tshape', 'ishape', 'sshape', 'zshape']
+    const randomOrder = shapeNames.sort(() => Math.random() - 0.5)
+    randomOrder.forEach(x => shapeArray.push(x))
+  }
 
   function shapeBuilder(input) {
     if (gameOver) {
@@ -197,7 +230,6 @@ function setupGame() {
     orientation = 0
     activeShape = input[0]
     activeObject = input[1]
-    //console.log(input[1][0])
     length = Object.keys(activeObject).length
     for (const position of input[1][0]) {
       if (cellsArray[position].classList.contains('fixed')) {
@@ -217,7 +249,6 @@ function setupGame() {
   function shapeMover(direction) {
     const nextPosition = activeObject[orientation].map(x => x + direction)
     for (const position of nextPosition) {
-      //console.log(position)
       if (position >= gridCellCount || cellsArray[position].classList.contains('fixed')) {
         direction === width ? toFixed() : direction
         return
@@ -279,18 +310,10 @@ function setupGame() {
     const roundToWidth = rotation.map(x => Math.floor(x / width) * width)
     away.forEach(x => x === 1 ? ones++ : ones[x])
 
-    // console.log(activeObject[orientation])
-    // console.log(rotation)
-    // console.log(away)
-    // console.log(roundToWidth)
-    //console.log(ones)
-
-
     for (let i = 0; i < roundToWidth.length; i++) {
       const current = roundToWidth[i]
 
       if (away[i] === 1 && away[i]) {
-        //console.log(away[i])
         check = current === roundToWidth[i + 1] ? true : false
         if (!check) {
           return
@@ -307,8 +330,6 @@ function setupGame() {
         handleGameOver()
         break
       }
-      //console.log(cellsArray[position])
-      //console.log(activeObject[orientation])
       cellsArray[position].classList.remove('ghost')
       cellsArray[position].classList.remove('active')
       Array.from(cellsArray[position].classList).length === 2 ? (cellsArray[position].classList.add('fixed'), console.log('adding fixed')) : console.log('x')
@@ -322,68 +343,14 @@ function setupGame() {
     return (activeObject[orientation].some(x => (x + direction) % width === 0))
   }
 
-  document.addEventListener('keydown', (event) => {
-    if (gameOver) {
-      return
-    }
-    if (event.key === 'ArrowRight') {
-      if (boundaryChecker(1)) {
-        return
-      }
-      shapeMover(1)
-      updateAudio(audio3, 'move1')
-
-    } else if (event.key === 'ArrowLeft') {
-      if (boundaryChecker()) {
-        return
-      }
-      shapeMover(-1)
-      updateAudio(audio3, 'move1')
-
-    } else if (event.key === 'ArrowUp' || event.key === 'x') {
-      if (!oneAwayChecker(1)) {
-        return
-      }
-      shapeRotator(1)
-      updateAudio(audio4, 'spin')
-
-    } else if (event.key === 'z') {
-      if (!oneAwayChecker(-1)) {
-        return
-      }
-      shapeRotator(-1)
-      updateAudio(audio4, 'spin')
-
-
-    } else if (event.key === 'ArrowDown') {
-      // if (activeObject[orientation].some(x => (x + width) >= gridCellCount)) {
-      //   return
-      // }
-      shapeMover(width)
-      currentScore += (1 * (currentLevel + 1))
-      //console.log(currentScore)
-      scoreDiv.innerHTML = `Total Score: ${currentScore} Points`
-    } else if (event.code === 'Space') {
-      toHold()
-    } else if (event.key === 'c') {
-      hardDrop()
-    }
-  })
-
-  // checker.addEventListener('click', fullRowChecker)
-
   function fullRowChecker() {
-
     let cleared = false
     let linesCleared = 0
     const previousLevel = currentLevel
-    //console.log(previousLevel)
-    let rowArray = []
-    //console.log('checking for full rows')
+    const rowArray = []
     for (let i = 0; i <= linesCleared; i++) {
       let check = Math.floor((gridCellCount - 1) / width)
       cleared = false
-      //console.log('lineCleared loop', linesCleared)
       for (let i = gridCellCount - 1; i >= 0; i--) {
 
         if (Math.floor(i / width) === check) {
@@ -392,17 +359,15 @@ function setupGame() {
         if (rowArray.length === 10) {
           if (cleared) {
             rowArray.forEach(x => {
-              let fullClass = Array.from(x.classList)
+              const fullClass = Array.from(x.classList)
               fullClass.splice(0, 1)
-              //console.log(fullClass, x)
               rowMover(x, fullClass)
             })
           }
           check--
           if (rowArray.every(x => x.classList.contains('fixed'))) {
             rowArray.forEach(x => {
-              let fullClass = Array.from(x.classList)
-              //console.log(fullClass)
+              const fullClass = Array.from(x.classList)
               fullClass.splice(0, 1)
               x.classList.remove(...fullClass)
               cleared = true
@@ -416,16 +381,13 @@ function setupGame() {
       }
     }
     currentScore += (scoreUpdate(linesCleared, currentLevel) * (currentCombo - 1))
-    //console.log(currentScore)
     currentLevel = Math.floor(totalLines / 10)
-    //console.log(previousLevel, currentLevel, currentScore)
     updateScore()
     linesCleared === 0 ? currentCombo = 1 : currentCombo
     linesDiv.innerHTML = `Lines Cleared: ${totalLines}`
     comboDiv.innerHTML = `Combo: ${currentCombo} x`
     scoreDiv.innerHTML = `Total Score: ${currentScore} Points`
     levelDiv.innerHTML = `Level: ${currentLevel}`
-    //console.log(combo, linesCleared)
 
     const nextShape = shapeArray.shift()
     const nextShapeFunction = eval(nextShape)
@@ -440,45 +402,17 @@ function setupGame() {
     nextShapeDiv.innerHTML = iconDisplayer(shapeArray[0])
   }
 
-
   function rowMover(cell, list) {
     cell.classList.remove(...list)
-    let newIndex = cellsArray.indexOf(cell) + width
+    const newIndex = cellsArray.indexOf(cell) + width
     cellsArray[newIndex].classList.add(...list)
   }
 
   function scoreUpdate(linesCleared, level) {
-    let score = linesCleared === 0 ? ([0, updateAudio(audio5, 'linedrop')]) : linesCleared === 1 ?
+    const score = linesCleared === 0 ? ([0, updateAudio(audio5, 'linedrop')]) : linesCleared === 1 ?
       ([40, updateAudio(audio5, 'lineclear')]) : linesCleared === 2 ? ([100, updateAudio(audio5, 'lineclear')]) : linesCleared === 3 ? ([300, updateAudio(audio5, 'lineclear')]) : ([1200, updateAudio(audio5, 'tetris')])
     return (score[0] * (1 + level))
   }
-
-
-
-
-
-  // const nextPosition = activeObject[orientation].map(x => x + direction)
-  // for (const position of nextPosition) {
-  //   if (cellsArray[position].classList.contains('fixed')) {
-  //     return
-  //   }
-
-
-  //real version
-  function addShapes() {
-    const shapeNames = ['squareshape', 'lshape', 'jshape', 'tshape', 'ishape', 'sshape', 'zshape']
-    const randomOrder = shapeNames.sort(() => Math.random() - 0.5)
-    randomOrder.forEach(x => shapeArray.push(x))
-  }
-
-
-  //double test
-  // function addShapes() {
-  //   const shapeNames = ['lshape', 'lshape', 'jshape', 'jshape', 'ishape', 'ishape', 'zshape']
-  //   const randomOrder = shapeNames.sort(() => Math.random() - 0.5)
-  //   randomOrder.forEach(x => shapeArray.push(x))
-  // }
-
 
   function toHold() {
     if (swapped) {
@@ -514,15 +448,12 @@ function setupGame() {
 
   function ghost() {
     for (const position of ghostArray) {
-      //console.log('hello')
-      // console.log(position)
       cellsArray[position].classList.remove('ghost')
       if (!cellsArray[position].classList.contains('active') && !cellsArray[position].classList.contains('fixed')) {
         cellsArray[position].classList.remove(`${activeShape}`)
-        //console.log('eggs4')
       }
     }
-    let ghostDifference = []
+    const ghostDifference = []
     const ghostMultiplication = activeObject[orientation].forEach(x => {
       let ghostTimes = 0
       while (x < (gridCellCount) && !cellsArray[x].classList.contains('fixed')) {
@@ -537,20 +468,14 @@ function setupGame() {
     ghostArray = activeObject[orientation].map(x => {
       return x + (hardDropCount * width)
     })
-    //console.log(ghostDifference)
-    //console.log(ghostArray)
 
     for (const position of ghostArray) {
       if (!cellsArray[position].classList.contains('active')) {
-        //console.log('hello 2')
         cellsArray[position].classList.add('ghost')
       }
-      //console.log('joe 2')
       cellsArray[position].classList.add(`${activeShape}`)
     }
   }
-
-  // shapeMover(width)
 
   function hardDrop() {
     clearInterval(time)
@@ -574,7 +499,6 @@ function setupGame() {
     scoreDiv.innerHTML = `Total Score: ${currentScore} Points`
   }
 
-
   function gameOverCheck(position) {
     if (position < 2 * width) {
       gameOver = true
@@ -582,11 +506,9 @@ function setupGame() {
     }
   }
 
-
   function iconDisplayer(shape) {
     return `<img src="assets/${shape}.png">`
   }
-
 
   function updateAudio(audio, input) {
     audio.src = `assets/${input}.wav`
@@ -598,20 +520,6 @@ function setupGame() {
 
   }
 
-
-  const scoresList = document.querySelector('ol')
-  const playButton = document.querySelector('#startgame')
-
-
-  if (localStorage) {
-    const players = JSON.parse(localStorage.getItem('players'))
-    if (players) {
-      highScores = players
-      renderList(highScores, scoresList)
-    }
-  }
-
-
   function renderList(scores, scoresList) {
 
     const array = scores.sort((playerA, playerB) => playerB.score - playerA.score).map(player => {
@@ -621,8 +529,6 @@ function setupGame() {
     scoresList.innerHTML = array.slice(0, 10).join('')
   }
 
-
-
   function updateScore() {
     for (const score of highScores) {
       if (gameOver && score.active) {
@@ -630,14 +536,11 @@ function setupGame() {
       } else if (score.active === true) {
         highScores.splice(highScores.indexOf(score), 1)
       }
-
     }
-    console.log(highScores)
     if (!gameOver) {
       const player = { name: newName, score: currentScore, active: true }
       highScores.push(player)
     }
-    // }
     renderList(highScores, scoresList)
     if (localStorage) {
       localStorage.setItem('players', JSON.stringify(highScores))
@@ -649,7 +552,6 @@ function setupGame() {
     this.classList.remove('levelup')
   }
 
-
   function handleGameOver() {
     clearInterval(time)
     updateAudio(audio1, 'gameover')
@@ -659,7 +561,7 @@ function setupGame() {
     return
   }
 
-generateGrid()
+  generateGrid()
 }
 
 window.addEventListener('DOMContentLoaded', setupGame)
