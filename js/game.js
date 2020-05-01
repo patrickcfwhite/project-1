@@ -1,34 +1,46 @@
 function setupGame() {
 
+
+  // Main grid
   const grid = document.querySelector('.grid')
+  
+  // Game information
   const linesDiv = document.querySelector('#lines')
   const comboDiv = document.querySelector('#combo')
   const scoreDiv = document.querySelector('#score')
-  const endScoreDiv = document.querySelector('#endscore')
   const levelDiv = document.querySelector('#level')
   const nextShapeDiv = document.querySelector('#nextshape')
   const holdShapeDiv = document.querySelector('#holdshape')
+  const endScoreDiv = document.querySelector('#endscore')
+  const scoresList = document.querySelector('ol')
+  
+  // Audio
   const audio1 = document.querySelector('#audio1')
   const audio2 = document.querySelector('#audio2')
   const audio3 = document.querySelector('#audio3')
   const audio4 = document.querySelector('#audio4')
   const audio5 = document.querySelector('#audio4')
   const allAudio = document.querySelectorAll('audio')
+  
+  // Buttons
   const toggleAudio = document.querySelector('#toggleaudio')
   const startButton = document.querySelector('#startgame')
   const restartButton = document.querySelector('#restartgame')
+  const playButton = document.querySelector('#startgame')
+  
+  // Overlays for start and end of game
   const nameInput = document.querySelector('#playername')
   const startScreen = document.querySelector('#beginning')
   const endScreen = document.querySelector('#end')
-  const scoresList = document.querySelector('ol')
-  const playButton = document.querySelector('#startgame')
-
+  
+  // Original volume settings for specific sound effects
   audio2.volume = 0.18
   audio3.volume = 0.18
   audio4.volume = 0.18
   audio5.volume = 0.20
   audio1.volume = 0.28
 
+  // Starting values and game variables
   const cellsArray = []
   const shapeArray = []
   const holdArray = []
@@ -46,10 +58,19 @@ function setupGame() {
   let hardDropCount = 0
   let currentCombo = 1
   let currentLevel = Math.floor(totalLines / 10)
+
+  // Game 'state'
   let full = false
   let swapped = false
   let gameOver = false
+
+  //Info display
+  linesDiv.innerHTML = `Lines Cleared: ${totalLines}`
+  comboDiv.innerHTML = `Combo: ${currentCombo} x`
+  scoreDiv.innerHTML = `Total Score: ${currentScore} Points`
+  levelDiv.innerHTML = `Level: ${currentLevel}`
   
+  //Simpsons themed default highscore board
   let highScores = [
     { name: 'THRILLHO', score: 100000 }, { name: 'BART', score: 75000 },
     { name: 'MARTIN', score: 70000 }, { name: 'TODDFLAN', score: 65000 },
@@ -57,7 +78,7 @@ function setupGame() {
     { name: 'LENNY', score: 30000 }, { name: 'CARL', score: 15000 },
     { name: 'HOMER', score: 5000 }, { name: 'NED', score: 2000 }
   ]
-
+  //Update scores if local storage exists
   if (localStorage) {
     const players = JSON.parse(localStorage.getItem('players'))
     if (players) {
@@ -66,11 +87,7 @@ function setupGame() {
     }
   }
 
-  linesDiv.innerHTML = `Lines Cleared: ${totalLines}`
-  comboDiv.innerHTML = `Combo: ${currentCombo} x`
-  scoreDiv.innerHTML = `Total Score: ${currentScore} Points`
-  levelDiv.innerHTML = `Level: ${currentLevel}`
-
+  // On game start: update name, score, check for fullRow, and remove startScreen Overlay
   startButton.addEventListener('click', () => {
     if (nameInput.value === '') {
       return
@@ -82,6 +99,7 @@ function setupGame() {
     startScreen.classList.add('invisible')
   })
 
+  // Restart button: resets grid, score, upcoming shapes 
   restartButton.addEventListener('click', () => {
     shapeArray.splice(0, shapeArray.length)
     holdArray.splice(0, 1)
@@ -107,12 +125,14 @@ function setupGame() {
     endScreen.classList.toggle('invisible')
   })
 
+  //Mutes audio
   toggleAudio.addEventListener('click', () => {
     for (const audio of allAudio) {
       audio.muted = audio.muted ? false : true
     }
   })
 
+  //Handles key inputs
   document.addEventListener('keydown', (event) => {
     if (gameOver) {
       return
@@ -156,6 +176,7 @@ function setupGame() {
       hardDrop()
     }
   })
+  
   
   function squareshape(x) {
     return ['squareshape', { 0: [x, (x + 1), (x + width), (x + width + 1)] }]
