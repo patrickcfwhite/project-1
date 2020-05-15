@@ -145,7 +145,7 @@ When a new active shape is added to the grid this function is called:
   }
   
 ```
-This checks to see if the new shape will be blocked by any fixed cells, triggering a 'game over' and if not, it adds classes 'active' and `${activeShape}` to those cells.
+This checks to see if the new shape will be blocked by any fixed cells, triggering a 'game over' and if not, it adds classes `active` and `${activeShape}` to those cells.
 
 **orientation**, **activeShape** and **activeObject** are all stored as global variables and used by other functions throughout the game.,
 
@@ -494,7 +494,7 @@ Creating the ghost function also helped create a solution for a 'hard drop' func
 
 ### Stretch Goal 3: Sound design
 
-If I had time I wanted to add some sound design and or music to accompany the game but the Tetris theme is so iconic I didn't want to just imitate it. I also wanted to avoid the frenetic nature of this melody, as I find Tetris to be a rather peaceful game so I decided to interpret the melody in a sparse piano arrangement. I am a big fan of computer games and their soundtracks and I have recently been really impressed by the soundtrack to **Zelda: Breath of The Wild** and how it takes elements of the familiar Zelda themes and repurposes them to better fit the mood of the game so I used this as inspiration. As you level up it plays a short snippet of the main melody, reharmonised on solo piano. There are eight snippets of melody, which will begin again once you hit level nine. The audio is updateded within the `fullRowChecker` function, which in turn calls the `updateAudio` function.
+If I had time I wanted to add some sound design and or music to accompany the game but the Tetris theme is so iconic I didn't want to just imitate it. I also wanted to avoid the frenetic nature of this melody, as I find Tetris to be a rather peaceful game so I decided to interpret the melody in a sparse piano arrangement. I am a big fan of computer games and their soundtracks and I have recently been really impressed by the soundtrack to **Zelda: Breath of The Wild** and how it takes elements of the familiar Zelda themes and repurposes them to better fit the mood of the game so I used this as inspiration. As you level up it plays a short snippet of the main melody, reharmonised on solo piano with a little level-up tag to round it off. There are eight snippets of melody, which will begin again once you hit level nine. The audio is updateded within the `fullRowChecker` function, which in turn calls the `updateAudio` function.
 
 
 ```javascript
