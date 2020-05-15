@@ -145,7 +145,7 @@ When a new active shape is added to the grid this function is called:
   }
   
 ```
-This checks to see if the new shape will be blocked by any fixed cells, triggering a 'game over' and if not, it adds classes 'active' and `${activeShape}` to those cells.
+This checks to see if the new shape will be blocked by any fixed cells, triggering a 'game over' and if not, it adds classes `active` and `${activeShape}` to those cells.
 
 **orientation**, **activeShape** and **activeObject** are all stored as global variables and used by other functions throughout the game.,
 
