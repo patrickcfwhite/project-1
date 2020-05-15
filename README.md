@@ -33,7 +33,8 @@ I chose Tetris as it was considered one of the more difficult games and I wanted
 **[Play the game here](https://patrickcfwhite.github.io/project-1/)**
 ![](https://i.imgur.com/Cu0IOIO.png?2)
 
-##First Steps
+
+## First Steps
 
 I started by writing out some notes and pseudocode about the basic Tetris logic and functionality, hoping to identify the core components of gameplay I would need to faithfully recreate the game. **_I've used a few snippets of some pseudocode and code I wrote in the planning stages later on in this ReadMe, excuse the messiness some was written on the bus!_**
 
@@ -49,7 +50,7 @@ I started by writing out some notes and pseudocode about the basic Tetris logic 
 It was clear that **rotation** would be the most complex element so after creating the game grid I would start with this.
 
 
-##Creating the Grid
+## Creating the Grid
 
 The container would be a tall rectangular grid of cells. To create this, I made a function containing a 'for loop' to render individual cells by creating divs and then appending it to a parent container. The container is 20 visible rows and a fixed width of 10 columns. _n.b. I later enlarged the grid and created 4 hidden rows so that when a shape is created it appears by descending from above top of the grid. These hidden rows are also used to determine when a game finishes._
 
@@ -71,7 +72,7 @@ As well as appending cells to the container, they were also pushed into a cells 
 
 
 
-##Shapes and their movement
+## Shapes and their movement
 
 Each shape or *Tetronimo* in Tetris is made from four square blocks. They are named after the letters they resemble. There are seven in total:
 
@@ -106,7 +107,7 @@ At first all the shapes were stored simply as objects like above but to solve a 
   }
 ```
 
-###Displaying A Shape
+### Displaying A Shape
 
 The shape is displayed on the grid by adding or modifying specific classes to the occupied cells, as follows:
 
@@ -149,7 +150,7 @@ This checks to see if the new shape will be blocked by any fixed cells, triggeri
 **orientation**, **activeShape** and **activeObject** are all stored as global variables and used by other functions throughout the game.,
 
 
-###Movement
+### Movement
 Moving a shape down, or side to side is relatively straightforward. If we have the current coordinates we only have to add or subtract a certain amount to each coordinate.
 
 If we are moving right or left we `± 1` to each coordinate.
@@ -202,7 +203,7 @@ Here we check whether moving the shape can move in that direction or whether it 
 
 
 
-###Rotation
+### Rotation
 Rotating a shape is functionally similar to moving a shape, in that we are modifying which cells contain the active class. When rotating we are not however altering the coordinates, we are just choosing the orientation coordinates one step away in either direction. e.g. If `orientation = 1` and we are rotating clockwise we add 1 therefore, `orientation = 2`. To prevent the orientation breaking if moving from 4 to 0 instead of 4 to 5, the `newOrientation` variable is set using the code on line 2 from the extract below, where `length` is the amount of possible orientations of the shape, and `direction` is ±1 depending on the turning direction.
 
 ```javascript
@@ -262,9 +263,9 @@ To solve this, we have to check if any cells occupied by the new orientation are
 ```
 
 
-##Game Logic & State
+## Game Logic & State
 
-###State
+### State
 There are a number of variables used to keep track of aspects of the game. Here is a brief description of them:
 
   * **cellsArray**: Array of all the cells on the grid
@@ -289,7 +290,7 @@ There are a number of variables used to keep track of aspects of the game. Here 
   * **gameOver**: Checks game over conditions to end game
 
 
-###From Active to Fixed
+### From Active to Fixed
 As our active shape falls, each time it moves down a row the function controlling this checks if it's upcoming coordinates already hold either a fixed shape, or are out of range. If this is the case the class of the cells will change from `active` to `fixed`. If so, the function `toFixed` is called to update the classes on the current coordinate cells. It first checks to see if this would result in a game over, if not it updates the classes on the correct cells and then checks the length of the remaining classes in classList. If it is two we can infer it has the `${activeShape}` class and therefore needs to be `fixed` in place.
 
 ```javascript
@@ -310,7 +311,7 @@ As our active shape falls, each time it moves down a row the function controllin
 
 ```
 
-###Checking for full rows
+### Checking for full rows
 During each `toFixed` function call, the `fullRowChecker` function is called as the addition of the new fixed shape may have filled a row. 
 
 ```javascript
@@ -375,9 +376,9 @@ function rowMover(cell, list) {
 * This row moving happens for every row above the cleared row. The entire function then will repeat for as many times as a row has been cleared, as the max possible clearance is 4 rows at a time -- _A full Tetris!_
 
 
-##Stretch Goals
+## Stretch Goals
 
-###Stretch Goal 1: Holding a shape
+### Stretch Goal 1: Holding a shape
 One of my stretch goals was to add the hold function which is a *newer* feature of Tetris, first added to 1999's **The New Tetris**. At any time starting when a new active shape enters the grid until it locks in place, the single player can switch it for the held shape, adding it to the `holdArray` and launching the previously held shape. It can only be triggered once per active shape. This is achieved by the following function `toHold`. It will check first if it has already happened this turn, before removing the relevant classes from the `cellsArray` and trigger the next shape.
 
 ```javascript
@@ -412,7 +413,7 @@ I had thought this might be quite tricky to implement but it was actually quite 
 
 
 
-###Stretch Goal 2: Ghost mode (& 2.5: Hard Drop)
+### Stretch Goal 2: Ghost mode (& 2.5: Hard Drop)
 
 ![](https://i.imgur.com/soAeVVL.png)
 
@@ -491,7 +492,7 @@ Creating the ghost function also helped create a solution for a 'hard drop' func
 
 
 
-###Stretch Goal 3: Sound design
+### Stretch Goal 3: Sound design
 
 If I had time I wanted to add some sound design and or music to accompany the game but the Tetris theme is so iconic I didn't want to just imitate it. I also wanted to avoid the frenetic nature of this melody, as I find Tetris to be a rather peaceful game so I decided to interpret the melody in a sparse piano arrangement. I am a big fan of computer games and their soundtracks and I have recently been really impressed by the soundtrack to **Zelda: Breath of The Wild** and how it takes elements of the familiar Zelda themes and repurposes them to better fit the mood of the game so I used this as inspiration. As you level up it plays a short snippet of the main melody, reharmonised on solo piano. There are eight snippets of melody, which will begin again once you hit level nine. The audio is updateded within the `fullRowChecker` function, which in turn calls the `updateAudio` function.
 
@@ -519,9 +520,9 @@ If I had time I wanted to add some sound design and or music to accompany the ga
 
 As well as the level up sections, there are some simple textural piano sound effects for the other keypresses, as well as a final short melody using the main Tetris Theme for the game over screen.
 
-##Final thoughts
+## Final thoughts
 
-###Victories
+### Victories
 
 After an initial period of _'well how am I going to do any of this?'_ I was really pleased with how much it came together in a relatively straightforward manner. I think the amount of time I spent planning and preparing was really vital in having a clear approach to actually build the game. I of course encountered setbacks and hurdles but I never had to make wild changes to any of the game processes.
 
@@ -529,7 +530,7 @@ I'm definitely pleased with the overall gameplay, it feels like actual Tetris, a
 
 Finally I'm really glad I managed to achieve all my stretch goals, especially the sound design and music. Music has been a large part of my career and having the opportunity to utilise it feels rewarding.
 
-###Potential future features
+### Potential future features
 
 For me the biggest issue is that it is not responsively designed. As this was our first project I wanted to focus on delivering a polished working game and I didn't take into account how this would be represented on different screensizes. I'd never intended it to be a mobile game but it should definitely be more responsive to different screensizes.
 
@@ -540,7 +541,7 @@ I've tested a few different options for the speed increase as you level up and t
 Once I'd added the ghost function, I realised it was quite imbedded in the in-game processes and to allow users to toggle the function would require some refactoring of the code. This is something I'd like to add.
 
 
-###Lessons learnt
+### Lessons learnt
 
 Planning is key to having a clear vision and roadmap of what you want to achieve. It's much easier creating the answer when the question is clear.
 
