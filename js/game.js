@@ -47,12 +47,12 @@ function setupGame() {
   const width = 10
   const gridCellCount = width * (2 * width + 4)
   const point = 15
-  let ghostArray = []
-  let activeObject
   let activeShape
+  let activeObject
   let orientation
-  let newName
   let length
+  let ghostArray = []
+  let newName
   let totalLines = 0
   let currentScore = 0
   let hardDropCount = 0
@@ -295,6 +295,10 @@ function setupGame() {
     ghost()
   }
 
+  function boundaryChecker(direction = 0) {
+    return (activeObject[orientation].some(x => (x + direction) % width === 0))
+  }
+
   function shapeRotator(direction) {
     const newOrientation = ((orientation + length + direction) % length)
     for (const position of activeObject[newOrientation]) {
@@ -319,7 +323,7 @@ function setupGame() {
 
   function oneAwayChecker(direction) {
     let check = true
-    let ones = 0
+    // let ones = 0
     const away = []
     const rotation = activeObject[((orientation + length + direction) % length)]
     if (rotation.some(x => x >= gridCellCount)) {
@@ -329,7 +333,7 @@ function setupGame() {
       away.push(rotation[i] - rotation[i - 1])
     }
     const roundToWidth = rotation.map(x => Math.floor(x / width) * width)
-    away.forEach(x => x === 1 ? ones++ : ones[x])
+    // away.forEach(x => x === 1 ? ones++ : ones[x])
 
     for (let i = 0; i < roundToWidth.length; i++) {
       const current = roundToWidth[i]
@@ -358,10 +362,6 @@ function setupGame() {
     clearInterval(time)
     fullRowChecker()
     return
-  }
-
-  function boundaryChecker(direction = 0) {
-    return (activeObject[orientation].some(x => (x + direction) % width === 0))
   }
 
   function fullRowChecker() {
@@ -449,21 +449,13 @@ function setupGame() {
         cellsArray[position].classList.remove('ghost')
         cellsArray[position].classList.remove(`${activeShape}`)
       }
-      if (!full) {
-        holdArray.push(activeShape)
-        full = true
-        swapped = true
-        holdShapeDiv.innerHTML = iconDisplayer(holdArray[0])
-        const nextShape = eval(shapeArray.shift())
-        shapeBuilder(nextShape(point))
-      } else if (full && !swapped) {
-        holdArray.push(activeShape)
-        full = true
-        swapped = true
-        const nextShape = eval(holdArray.shift())
-        shapeBuilder(nextShape(point))
-        holdShapeDiv.innerHTML = iconDisplayer(holdArray[0])
-      }
+      holdArray.push(activeShape)
+      holdShapeDiv.innerHTML = iconDisplayer(holdArray[0])
+      const nextShape = !full ? eval(shapeArray.shift()) : eval(holdArray.shift())
+      full = true
+      swapped = true
+      shapeBuilder(nextShape(point))
+      holdShapeDiv.innerHTML = iconDisplayer(holdArray[0])
     }
   }
 
@@ -475,13 +467,12 @@ function setupGame() {
       }
     }
     const ghostDifference = []
-    const ghostMultiplication = activeObject[orientation].forEach(x => {
+    activeObject[orientation].forEach(x => {
       let ghostTimes = 0
       while (x < (gridCellCount) && !cellsArray[x].classList.contains('fixed')) {
         x += width
         ghostTimes++
       }
-
       ghostDifference.push(ghostTimes - 1)
       ghostDifference.sort((a, b) => b - a)
     })
@@ -499,6 +490,9 @@ function setupGame() {
   }
 
   function hardDrop() {
+    if (gameOver) {
+      return
+    }
     clearInterval(time)
     for (const position of ghostArray) {
       if (gameOverCheck(position)) {
